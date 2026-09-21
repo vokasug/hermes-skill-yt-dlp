@@ -10,7 +10,8 @@
 - **Метаданные** — название, автор, длительность, просмотры без скачивания
 - **Плейлисты** — целиком, в датированную подпапку с нумерацией
 - **SponsorBlock** — вырезание спонсорских вставок и саморекламы
-- **Cookies из браузера** — возрастные ограничения и приватные видео
+- **Cookies из браузера** — age-gate и приватные видео; на YouTube 429/bot — не панацея (см. лестницу ниже)
+- **YouTube 429/bot** — `download_dated.py` сам ретраит: `player_client=android,ios,tv` → Safari cookies → оба
 - **Файлы с датой** — всё складывается в `~/result-yt-dlp/YYYY-MM-DD_<название>.<ext>` (дата = день запуска)
 - **Рецепт для Telegram** — mp4/h264+aac ≤ 50 МБ, играет инлайн
 
@@ -61,8 +62,12 @@ Hermes подхватывает скилл автоматически; пров�
 
 ### 4. Проверка
 
+Перед любой задачей — обновить stable (`yt-dlp -U`, уже latest = no-op). Nightly не ставить.
+
 ```bash
+yt-dlp -U
 yt-dlp --version
+python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --self-test
 yt-dlp --js-runtimes node --skip-download --print "%(title)s" "https://www.youtube.com/watch?v=VIDEO_ID"
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
@@ -76,7 +81,14 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>      # mp3
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py -S res:720 <URL>   # не выше 720p
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --playlist <URL>   # весь плейлист
+python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
+  --cookies-from-browser safari \
+  --extractor-args "youtube:player_client=android,ios,tv"
+python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
+  -- --sponsorblock-remove sponsor
 ```
+
+На YouTube скрипт сам проходит лестницу 429/bot — эти флаги вручную дублировать не нужно. Формат 18 (прогрессивный ~360p) после `player_client` нормален для `--audio`; для видео его мало — берите DASH (cookies/web), не отдавайте 360p как готовый ролик.
 
 Полный контроль — сырой yt-dlp:
 
@@ -94,8 +106,11 @@ yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs \
 # вырезать спонсорские вставки
 yt-dlp --js-runtimes node --sponsorblock-remove sponsor,selfpromo <URL>
 
-# cookies из браузера (возрастные ограничения, приватные видео)
+# cookies из браузера (age-gate / приватные; на 429 не панацея)
 yt-dlp --js-runtimes node --cookies-from-browser safari <URL>
+
+# YouTube 429 / bot wall — обход через android/ios/tv API
+yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android,ios,tv" <URL>
 ```
 
 Подробные рецепты, подводные камни и процедуры для агента — в [SKILL.md](SKILL.md).
