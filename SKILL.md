@@ -1,8 +1,8 @@
 ---
 name: yt-dlp
 description: Download videos/audio/subs from 1700+ sites via yt-dlp.
-version: 1.1.0
-author: Hermes Agent
+version: 1.1.1
+author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
 metadata:
