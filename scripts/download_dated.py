@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download via yt-dlp -> /Users/alexander/result-yt-dlp/YYYY-MM-DD_<title>.<ext>
+"""Download via yt-dlp -> ~/result-yt-dlp/YYYY-MM-DD_<title>.<ext>
 
 Date prefix = date of launch (YYYY-MM-DD). Passes --js-runtimes node (skill rule:
 yt-dlp only enables deno by default, node must be explicit).
@@ -14,7 +14,7 @@ import subprocess
 import sys
 import time
 
-OUT_DIR = pathlib.Path("/Users/alexander/result-yt-dlp")
+OUT_DIR = pathlib.Path.home() / "result-yt-dlp"
 SKIP_SUFFIXES = (".part", ".ytdl", ".tmp")
 YT_DLP = "yt-dlp"
 YOUTUBE_PLAYER_CLIENTS = "youtube:player_client=android,ios,tv"

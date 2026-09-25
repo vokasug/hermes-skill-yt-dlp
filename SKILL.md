@@ -40,7 +40,7 @@ Don't use for: стримы в реальном времени (это `--live-f
 
 ```bash
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
-# файлы: /Users/alexander/result-yt-dlp/YYYY-MM-DD_<название>.<ext>
+# файлы: ~/result-yt-dlp/YYYY-MM-DD_<название>.<ext>
 ```
 
 Дата `YYYY-MM-DD` = дата запуска. Опции: `-f "<селектор>"`, `-S res:720`,
@@ -58,7 +58,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 ~/.local/bin/yt-dlp --js-runtimes node -F <URL>
 
 # датированный файл вручную (в двойных кавычках shell выполнит $(date), а %(ext)s останется литералом)
-~/.local/bin/yt-dlp --js-runtimes node -o "/Users/alexander/result-yt-dlp/$(date +%F)_%(title).150B.%(ext)s" <URL>
+~/.local/bin/yt-dlp --js-runtimes node -o "$HOME/result-yt-dlp/$(date +%F)_%(title).150B.%(ext)s" <URL>
 ```
 
 Прочие команды (вывод в /tmp или workspace):
@@ -81,7 +81,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 -S "filesize~25M"     # ближе к 25 МБ
 
 # плейлист (датированная подпапка)
---yes-playlist -o "/Users/alexander/result-yt-dlp/$(date +%F)_%(playlist_title).100B/%(playlist_index)03d - %(title).150B.%(ext)s"
+--yes-playlist -o "$HOME/result-yt-dlp/$(date +%F)_%(playlist_title).100B/%(playlist_index)03d - %(title).150B.%(ext)s"
 
 # cookies из браузера (age-gate / приватные; на 429 не панацея — см. лестницу)
 --cookies-from-browser safari
@@ -93,7 +93,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 ## Procedure
 
 0. **Версия.** `~/.local/bin/yt-dlp -U` — дождаться «up to date» или установки новой stable. Не продолжать со старым бинарником, если апдейт доступен. Гейт пройден: stdout содержит `up to date` или `Updated yt-dlp to`.
-1. Определить, что скачиваем (видео/mp3/плейлист/субтитры). Основной путь — скрипт `download_dated.py` (датированные файлы в `/Users/alexander/result-yt-dlp/`).
+1. Определить, что скачиваем (видео/mp3/плейлист/субтитры). Основной путь — скрипт `download_dated.py` (датированные файлы в `~/result-yt-dlp/`).
 2. Запустить: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py [--audio] <URL>`; для больших файлов — `terminal(background=true)` + `process wait`. mkdir не нужен — скрипт создаёт папку сам. На YouTube скрипт сам проходит лестницу (шаг 3), вручную флаги дублировать не нужно.
 3. **YouTube 429 / «Sign in to confirm you’re not a bot» / Missing Visitor Data / GVS PO Token.** Webpage 429 сам по себе не стоп, если API-клиенты отдают title/duration. Порядок (скрипт делает это сам; сырой yt-dlp — руками):
    1. как есть: `--js-runtimes node`;
@@ -126,12 +126,12 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 - `-f worst` даёт «худший по всем параметрам»; для минимального размера используй `-S +size,+br`.
 - URL из плейлиста без `--no-playlist` качает ВЕСЬ плейлист.
 - Русские имена файлов: добавляй `--restrict-filenames` если ОС/сеть капризничает (по умолчанию кириллица сохраняется).
-- Скачанное — результат задачи: по умолчанию сохраняй через `download_dated.py` в `/Users/alexander/result-yt-dlp/`; временные файлы (для немедленной отправки MEDIA:) — в /tmp.
+- Скачанное — результат задачи: по умолчанию сохраняй через `download_dated.py` в `~/result-yt-dlp/`; временные файлы (для немедленной отправки MEDIA:) — в /tmp.
 
 ## Verification
 
 1. Перед работой: `~/.local/bin/yt-dlp -U` напечатал `up to date` или `Updated yt-dlp to`. Регрессия скрипта: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --self-test` → `SELFTEST OK`.
-2. Скрипт напечатал `OK /Users/alexander/result-yt-dlp/YYYY-MM-DD_<название>.<ext> (N KiB)` — имя начинается с сегодняшней даты, размер > 0.
+2. Скрипт напечатал `OK ~/result-yt-dlp/YYYY-MM-DD_<название>.<ext> (N KiB)` — имя начинается с сегодняшней даты, размер > 0.
 3. `ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,codec_type -of default=noprint_wrappers=1 <файл>` — кодеки, длительность, размер на месте.
 4. `[Merger] Merging formats into ...` в логе yt-dlp — склейка прошла, part-файлы удалены.
 5. 0-байтовый файл = ошибка скачивания — повторить.

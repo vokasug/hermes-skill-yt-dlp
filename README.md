@@ -117,7 +117,7 @@ yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android,ios,tv
 
 ## Настройка под себя
 
-Скрипт и SKILL.md содержат пути, захардкоженные под конкретную машину (`/Users/alexander/result-yt-dlp`). На своём Mac замените `OUT_DIR` в `scripts/download_dated.py` и пути в SKILL.md на свои.
+Скрипт пишет вывод в `~/result-yt-dlp` — путь строится от домашней папки текущего пользователя (`pathlib.Path.home()`), ничего менять не нужно.
 
 ## Структура репозитория
 
