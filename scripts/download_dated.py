@@ -4,8 +4,9 @@
 Date prefix = date of launch (YYYY-MM-DD). Passes --js-runtimes node (skill rule:
 yt-dlp only enables deno by default, node must be explicit).
 
-YouTube 429/bot: retries with player_client=android,ios,tv, then Safari cookies,
-then both. Extra yt-dlp flags: --cookies-from-browser, --extractor-args, or after --.
+YouTube 429/bot: retries with player_client=android,ios,tv, then Chrome cookies
+(YouTube login lives in Chrome), then both.
+Extra yt-dlp flags: --cookies-from-browser, --extractor-args, or after --.
 """
 import argparse
 import datetime
@@ -18,6 +19,7 @@ OUT_DIR = pathlib.Path.home() / "result-yt-dlp"
 SKIP_SUFFIXES = (".part", ".ytdl", ".tmp")
 YT_DLP = "yt-dlp"
 YOUTUBE_PLAYER_CLIENTS = "youtube:player_client=android,ios,tv"
+COOKIES_BROWSER = "chrome"  # YouTube login lives in Chrome; Safari cookies are empty
 
 
 def is_youtube_url(url: str) -> bool:
@@ -34,7 +36,7 @@ def parse_args(argv=None):
     ap.add_argument("--playlist", action="store_true",
                     help="allow full playlist download (default --no-playlist)")
     ap.add_argument("--cookies-from-browser", default=None, metavar="BROWSER",
-                    help="yt-dlp --cookies-from-browser, e.g. safari")
+                    help="yt-dlp --cookies-from-browser, e.g. chrome")
     ap.add_argument("--extractor-args", default=None,
                     help="yt-dlp --extractor-args, e.g. youtube:player_client=android,ios,tv")
     ap.add_argument("passthrough", nargs=argparse.REMAINDER,
@@ -95,9 +97,9 @@ def fallback_attempts(args):
     has_cookies = bool(cookies0)
     if not has_clients and add(cookies0, YOUTUBE_PLAYER_CLIENTS):
         yield cookies0, YOUTUBE_PLAYER_CLIENTS
-    if not has_cookies and add("safari", ext0):
-        yield "safari", ext0
-    both_c, both_e = cookies0 or "safari", ext0 or YOUTUBE_PLAYER_CLIENTS
+    if not has_cookies and add(COOKIES_BROWSER, ext0):
+        yield COOKIES_BROWSER, ext0
+    both_c, both_e = cookies0 or COOKIES_BROWSER, ext0 or YOUTUBE_PLAYER_CLIENTS
     if add(both_c, both_e):
         yield both_c, both_e
 
@@ -111,19 +113,19 @@ def self_test():
     attempts = list(fallback_attempts(args))
     assert attempts[0] == (None, None), attempts
     assert (None, YOUTUBE_PLAYER_CLIENTS) in attempts
-    assert ("safari", None) in attempts
-    assert ("safari", YOUTUBE_PLAYER_CLIENTS) in attempts
+    assert ("chrome", None) in attempts
+    assert ("chrome", YOUTUBE_PLAYER_CLIENTS) in attempts
     assert len(attempts) == 4, attempts
 
     with_flags = parse_args([
-        "--cookies-from-browser", "safari",
+        "--cookies-from-browser", "chrome",
         "--extractor-args", YOUTUBE_PLAYER_CLIENTS,
         "https://youtu.be/AAAAAAAAAAA",
     ])
     cmd2 = build_cmd(with_flags, today="2026-09-21")
-    assert "--cookies-from-browser" in cmd2 and "safari" in cmd2
+    assert "--cookies-from-browser" in cmd2 and "chrome" in cmd2
     assert "--extractor-args" in cmd2
-    assert list(fallback_attempts(with_flags)) == [("safari", YOUTUBE_PLAYER_CLIENTS)]
+    assert list(fallback_attempts(with_flags)) == [("chrome", YOUTUBE_PLAYER_CLIENTS)]
 
     extra = parse_args([
         "--audio", "https://example.com/v",

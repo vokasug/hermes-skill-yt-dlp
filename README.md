@@ -11,7 +11,7 @@
 - **Плейлисты** — целиком, в датированную подпапку с нумерацией
 - **SponsorBlock** — вырезание спонсорских вставок и саморекламы
 - **Cookies из браузера** — age-gate и приватные видео; на YouTube 429/bot — не панацея (см. лестницу ниже)
-- **YouTube 429/bot** — `download_dated.py` сам ретраит: `player_client=android,ios,tv` → Safari cookies → оба
+- **YouTube 429/bot** — `download_dated.py` сам ретраит: `player_client=android,ios,tv` → Chrome cookies → оба
 - **Файлы с датой** — всё складывается в `~/result-yt-dlp/YYYY-MM-DD_<название>.<ext>` (дата = день запуска)
 - **Рецепт для Telegram** — mp4/h264+aac ≤ 50 МБ, играет инлайн
 
@@ -82,7 +82,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>   
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py -S res:720 <URL>   # не выше 720p
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --playlist <URL>   # весь плейлист
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
-  --cookies-from-browser safari \
+  --cookies-from-browser chrome \
   --extractor-args "youtube:player_client=android,ios,tv"
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
   -- --sponsorblock-remove sponsor
@@ -107,7 +107,7 @@ yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs \
 yt-dlp --js-runtimes node --sponsorblock-remove sponsor,selfpromo <URL>
 
 # cookies из браузера (age-gate / приватные; на 429 не панацея)
-yt-dlp --js-runtimes node --cookies-from-browser safari <URL>
+yt-dlp --js-runtimes node --cookies-from-browser chrome <URL>
 
 # YouTube 429 / bot wall — обход через android/ios/tv API
 yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android,ios,tv" <URL>
