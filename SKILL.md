@@ -101,6 +101,10 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
    3. `--cookies-from-browser chrome` (логин YouTube живёт в Chrome; Safari пустой);
    4. оба вместе.
    Cookies ≠ панацея: в инциденте 2026-09-21 cookies упали так же, как голый web; спас player_client.
+   429 на endpoint субтитров — обычно IP rate-limit, а не bot-wall: браузер cookies роли не
+   играет (инцидент 2026-09-27: safari- и chrome-cookies на одних и тех же субтитрах давали
+   одинаковый 429, прошёл повтор по таймингу). Первый шаг при 429 на субтитрах — повтор
+   «как есть» через 30–60 с, и только потом лестница выше.
 4. Нестандартные задачи (субтитры, SponsorBlock) — сырой yt-dlp с шаблоном вывода из Quick Reference (дата через `$(date +%F)`). Cookies и extractor-args — теми же флагами, что в лестнице.
 5. Отчитываться списком `OK <путь>` строк из stdout скрипта. Не «скачал», пока файл не подтверждён на диске (Verification ниже).
 
