@@ -1,7 +1,7 @@
 ---
 name: yt-dlp
 description: Download videos/audio/subs from 1700+ sites via yt-dlp.
-version: 1.2.0
+version: 1.3.0
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
@@ -94,8 +94,9 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 
 0. **Версия.** `~/.local/bin/yt-dlp -U` — дождаться «up to date» или установки новой stable. Не продолжать со старым бинарником, если апдейт доступен. Гейт пройден: stdout содержит `up to date` или `Updated yt-dlp to`.
 1. Определить, что скачиваем (видео/mp3/плейлист/субтитры). Основной путь — скрипт `download_dated.py` (датированные файлы в `~/result-yt-dlp/`).
-2. Запустить: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py [--audio] <URL>`; для больших файлов — `terminal(background=true)` + `process wait`. mkdir не нужен — скрипт создаёт папку сам. На YouTube скрипт сам проходит лестницу (шаг 3), вручную флаги дублировать не нужно.
-3. **YouTube 429 / «Sign in to confirm you’re not a bot» / Missing Visitor Data / GVS PO Token.** Webpage 429 сам по себе не стоп, если API-клиенты отдают title/duration. Порядок (скрипт делает это сам; сырой yt-dlp — руками):
+2. **Дефолт качества для видео — 1080p** (`-S 'res:1080,vcodec:h264,ext:mp4:m4a'` или лучший DASH до 1080p, напр. `-f '137+140'`). Если 1080p недоступен (проверить `-F`) — НЕ качать молча ниже: показать пользователю список доступных разрешений (выше и ниже) и спросить, какое взять. Исключение — пользователь сам явно указал качество или ограничение размера. На YouTube 720p h264-itag (136) часто всего ~425 кбит/с, тогда как сайт отдаёт VP9 ~685 кбит/с или 1080p-мастер — «720p» файлом выглядит заметно хуже сайта.
+3. Запустить: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py [--audio] <URL>`; для больших файлов — `terminal(background=true)` + `process wait`. mkdir не нужен — скрипт создаёт папку сам. На YouTube скрипт сам проходит лестницу (шаг 4), вручную флаги дублировать не нужно.
+4. **YouTube 429 / «Sign in to confirm you’re not a bot» / Missing Visitor Data / GVS PO Token.** Webpage 429 сам по себе не стоп, если API-клиенты отдают title/duration. Порядок (скрипт делает это сам; сырой yt-dlp — руками):
    1. как есть: `--js-runtimes node`;
    2. `--extractor-args "youtube:player_client=android,ios,tv"` — рабочий путь, когда cookies не помогли;
    3. `--cookies-from-browser chrome` (логин YouTube живёт в Chrome; Safari пустой);
@@ -105,8 +106,8 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
    играет (инцидент 2026-09-27: safari- и chrome-cookies на одних и тех же субтитрах давали
    одинаковый 429, прошёл повтор по таймингу). Первый шаг при 429 на субтитрах — повтор
    «как есть» через 30–60 с, и только потом лестница выше.
-4. Нестандартные задачи (субтитры, SponsorBlock) — сырой yt-dlp с шаблоном вывода из Quick Reference (дата через `$(date +%F)`). Cookies и extractor-args — теми же флагами, что в лестнице.
-5. Отчитываться списком `OK <путь>` строк из stdout скрипта. Не «скачал», пока файл не подтверждён на диске (Verification ниже).
+5. Нестандартные задачи (субтитры, SponsorBlock) — сырой yt-dlp с шаблоном вывода из Quick Reference (дата через `$(date +%F)`). Cookies и extractor-args — теми же флагами, что в лестнице.
+6. Отчитываться списком `OK <путь>` строк из stdout скрипта. Не «скачал», пока файл не подтверждён на диске (Verification ниже).
 
 ## Recipes
 

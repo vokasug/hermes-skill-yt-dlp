@@ -79,7 +79,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py "https://www.you
 ```bash
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]   # видео
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>      # mp3
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py -S res:720 <URL>   # не выше 720p
+python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py -S res:1080 <URL>  # не выше 1080p (дефолт качества)
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --playlist <URL>   # весь плейлист
 python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
   --cookies-from-browser chrome \
