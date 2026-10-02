@@ -1,7 +1,7 @@
 ---
 name: yt-dlp
-description: Download videos/audio/subs from 1700+ sites via yt-dlp.
-version: 1.3.0
+description: download videos/audio/subs from web sites via yt-dlp
+version: 1.3.1
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
