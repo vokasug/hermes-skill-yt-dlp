@@ -54,8 +54,8 @@ export PATH="$HOME/.local/bin:$PATH"
 ### 3. Скилл в Hermes Agent
 
 ```bash
-mkdir -p ~/.hermes/skills/media
-git clone https://github.com/vokasug/hermes-skill-yt-dlp ~/.hermes/skills/media/yt-dlp
+mkdir -p $HERMES_HOME/skills/media
+git clone https://github.com/vokasug/hermes-skill-yt-dlp $HERMES_HOME/skills/media/yt-dlp
 ```
 
 Hermes подхватывает скилл автоматически; проверить: `hermes skills list`.
@@ -67,9 +67,9 @@ Hermes подхватывает скилл автоматически; пров�
 ```bash
 yt-dlp -U
 yt-dlp --version
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --self-test
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --self-test
 yt-dlp --js-runtimes node --skip-download --print "%(title)s" "https://www.youtube.com/watch?v=VIDEO_ID"
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py "https://www.youtube.com/watch?v=VIDEO_ID"
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
 
 ## Использование
@@ -77,14 +77,14 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py "https://www.you
 Основной путь — скрипт с датированным выводом в `~/result-yt-dlp/`:
 
 ```bash
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]   # видео
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>      # mp3
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py -S res:1080 <URL>  # не выше 1080p (дефолт качества)
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --playlist <URL>   # весь плейлист
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]   # видео
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>      # mp3
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py -S res:1080 <URL>  # не выше 1080p (дефолт качества)
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --playlist <URL>   # весь плейлист
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
   --cookies-from-browser chrome \
   --extractor-args "youtube:player_client=android,ios,tv"
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --audio <URL> \
   -- --sponsorblock-remove sponsor
 ```
 

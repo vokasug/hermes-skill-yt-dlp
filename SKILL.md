@@ -1,7 +1,7 @@
 ---
 name: yt-dlp
 description: download videos/audio/subs from web sites via yt-dlp
-version: 1.3.1
+version: 1.3.2
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
@@ -37,10 +37,10 @@ Don't use for: стримы в реальном времени (это `--live-f
 
 ## Quick Reference
 
-**Основной путь — датированное скачивание (скрипт скилла):**
+**Основной путь — датированное скачивание (скрипт скилла; `$HERMES_HOME` — корень активного профиля Hermes, env-переменная):**
 
 ```bash
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 # файлы: ~/result-yt-dlp/YYYY-MM-DD_<название>.<ext>
 ```
 
@@ -96,7 +96,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 0. **Версия.** `~/.local/bin/yt-dlp -U` — дождаться «up to date» или установки новой stable. Не продолжать со старым бинарником, если апдейт доступен. Гейт пройден: stdout содержит `up to date` или `Updated yt-dlp to`.
 1. Определить, что скачиваем (видео/mp3/плейлист/субтитры). Основной путь — скрипт `download_dated.py` (датированные файлы в `~/result-yt-dlp/`).
 2. **Дефолт качества для видео — 1080p** (`-S 'res:1080,vcodec:h264,ext:mp4:m4a'` или лучший DASH до 1080p, напр. `-f '137+140'`). Если 1080p недоступен (проверить `-F`) — НЕ качать молча ниже: показать пользователю список доступных разрешений (выше и ниже) и спросить, какое взять. Исключение — пользователь сам явно указал качество или ограничение размера. На YouTube 720p h264-itag (136) часто всего ~425 кбит/с, тогда как сайт отдаёт VP9 ~685 кбит/с или 1080p-мастер — «720p» файлом выглядит заметно хуже сайта.
-3. Запустить: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py [--audio] <URL>`; для больших файлов — `terminal(background=true)` + `process wait`. mkdir не нужен — скрипт создаёт папку сам. На YouTube скрипт сам проходит лестницу (шаг 4), вручную флаги дублировать не нужно.
+3. Запустить: `python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py [--audio] <URL>`; для больших файлов — `terminal(background=true)` + `process wait`. mkdir не нужен — скрипт создаёт папку сам. На YouTube скрипт сам проходит лестницу (шаг 4), вручную флаги дублировать не нужно.
 4. **YouTube 429 / «Sign in to confirm you’re not a bot» / Missing Visitor Data / GVS PO Token.** Webpage 429 сам по себе не стоп, если API-клиенты отдают title/duration. Порядок (скрипт делает это сам; сырой yt-dlp — руками):
    1. как есть: `--js-runtimes node`;
    2. `--extractor-args "youtube:player_client=android,ios,tv"` — рабочий путь, когда cookies не помогли;
@@ -134,7 +134,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 
 ## Verification
 
-1. Перед работой: `~/.local/bin/yt-dlp -U` напечатал `up to date` или `Updated yt-dlp to`. Регрессия скрипта: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --self-test` → `SELFTEST OK`.
+1. Перед работой: `~/.local/bin/yt-dlp -U` напечатал `up to date` или `Updated yt-dlp to`. Регрессия скрипта: `python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --self-test` → `SELFTEST OK`.
 2. Скрипт напечатал `OK ~/result-yt-dlp/YYYY-MM-DD_<название>.<ext> (N KiB)` — имя начинается с сегодняшней даты, размер > 0.
 3. `ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,codec_type -of default=noprint_wrappers=1 <файл>` — кодеки, длительность, размер на месте.
 4. Видео не ниже 720p: ffprobe по `height` из stream. Скрипт может отрапортовать `OK` на format 18 (360p) после лестницы player_client — это не результат: продолжать через cookies/DASH (`-f "137+140"` и т.п.) или сообщить пользователю.
