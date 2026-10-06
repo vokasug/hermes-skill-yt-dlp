@@ -16,21 +16,22 @@ metadata:
 Скачивание видео/аудио/субтитров с YouTube и 1700+ сайтов. Установлен как standalone-бинарник
 (не brew — brew тянул бы deno и python@3.14 как зависимости). Обновления: `yt-dlp -U`.
 
-## Environment (проверено 2026-09-21)
+## Environment
 
-- Бинарник: `~/.local/bin/yt-dlp` (v2026.08.19, macOS universal, checksum сверен). Репо: https://github.com/yt-dlp/yt-dlp (канал `stable`).
+- Бинарник: `~/.local/bin/yt-dlp` (v2026.08.19, macOS universal). Репо: https://github.com/yt-dlp/yt-dlp (канал `stable`).
 - ffmpeg 9.0.1 есть в PATH — склейка DASH-потоков и `-x` работают
 - node v22 есть, НО yt-dlp включает по умолчанию только **deno** (не установлен).
   **ВСЕГДА добавляй `--js-runtimes node`** — без него YouTube отдаёт урезанные форматы
   (warning «No supported JavaScript runtime» → «Requested format is not available»).
-- Конфиг-файл не создавался (запрещено менять настройки без явного разрешения) — флаг передавать руками.
-- **Перед любой задачей:** `~/.local/bin/yt-dlp -U` (самообновление с GitHub Releases, канал stable). Уже latest — no-op. Nightly не ставить. После успешного обновления вписать сюда новую версию и дату.
+- Конфиг-файл не создавать (настройки не менять без явного разрешения) — флаги передавать руками.
+- **Перед любой задачей:** `~/.local/bin/yt-dlp -U` (самообновление с GitHub Releases, канал stable). Уже latest — no-op. Nightly не ставить. После успешного обновления вписать сюда новую версию.
 
 ## When to Use
 
 - «скачай видео по ссылке» (YouTube/VK/RuTube/Twitter/Reddit и др.)
 - «вытащи аудио в mp3», «скачай субтитры», «дай метаданные ролика»
 - плейлисты/каналы, обрезка SponsorBlock-рекламы, скриншот кадра через скачанное видео
+- Возможности вне этого скилла — полный справочник опций: https://github.com/yt-dlp/yt-dlp#readme (format selection, output template, post-processing); wiki: https://github.com/yt-dlp/yt-dlp/wiki
 
 Don't use for: стримы в реальном времени (это `--live-from-start`/streamlink-территория), торрент-трекеры.
 
@@ -70,8 +71,8 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 # метаданные без скачивания
 ~/.local/bin/yt-dlp --js-runtimes node --skip-download --print "%(title)s | %(uploader)s | %(duration)s сек | %(view_count)s" <URL>
 
-# субтитры (srt, рус+англ, включая автоперевод YouTube)
-~/.local/bin/yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs --sub-langs "ru,en" --sub-format "srt/best" -o "/tmp/dl/%(title)s.%(ext)s" --no-playlist <URL>
+# субтитры (srt, язык оригинала: ручные + auto «-orig»; <lang> — язык речи, напр. en)
+~/.local/bin/yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs --sub-langs "<lang>.*,<lang>" --sub-format "srt/best" -o "/tmp/dl/%(title)s.%(ext)s" --no-playlist <URL>
 
 # вырезать спонсорские вставки (SponsorBlock)
 ~/.local/bin/yt-dlp --js-runtimes node --sponsorblock-remove sponsor,selfpromo ...
@@ -101,11 +102,8 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
    2. `--extractor-args "youtube:player_client=android,ios,tv"` — рабочий путь, когда cookies не помогли;
    3. `--cookies-from-browser chrome` (логин YouTube живёт в Chrome; Safari пустой);
    4. оба вместе.
-   Cookies ≠ панацея: в инциденте 2026-09-21 cookies упали так же, как голый web; спас player_client.
-   429 на endpoint субтитров — обычно IP rate-limit, а не bot-wall: браузер cookies роли не
-   играет (инцидент 2026-09-27: safari- и chrome-cookies на одних и тех же субтитрах давали
-   одинаковый 429, прошёл повтор по таймингу). Первый шаг при 429 на субтитрах — повтор
-   «как есть» через 30–60 с, и только потом лестница выше.
+   Cookies ≠ панацея: при bot-wall cookies могут дать тот же отказ, когда player_client проходит.
+   429 на субтитрах — это класс автопереводов: ручные и оригинальные auto (`-orig`) не лимитируются, поэтому `--sub-langs "<lang>.*,<lang>"`. Если всё же 429 — пройти лестницу выше по одному разу на ступень; все попытки дали 429 — сообщить об ошибке. Без пауз и отложенных повторов.
 5. Нестандартные задачи (субтитры, SponsorBlock) — сырой yt-dlp с шаблоном вывода из Quick Reference (дата через `$(date +%F)`). Cookies и extractor-args — теми же флагами, что в лестнице.
 6. Отчитываться списком `OK <путь>` строк из stdout скрипта. Не «скачал», пока файл не подтверждён на диске (Verification ниже).
 
@@ -120,9 +118,9 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 
 ## Pitfalls
 
-- YouTube на web-клиенте часто 429 / bot wall / «Missing required Visitor Data». Это не «yt-dlp сломан»: webpage может 429, пока android/ios/tv API уже отдают метаданные. Cookies не всегда спасают (инцидент 2026-09-21: cookies = тот же bot wall; сработал `--extractor-args "youtube:player_client=android,ios,tv"`).
-- `--cookies-from-browser chrome` требует: (1) логин в YouTube именно в Chrome (Safari-куки пустые — не предлагать), (2) Full Disk Access у процесса-предка (на машине пользователя gateway запущен через `/usr/bin/osascript` от launchd — FDA выдан ему 2026-09-27, иначе `~/Library/Cookies` и база кук Chrome дают `Operation not permitted` от TCC). Дешифровка Chrome-кук через keychain проходит молча.
-- android/ios могут пропускать https-форматы (SABR, issue 12482); tv может быть DRM (issue 12563). Это warning, не стоп, пока есть хоть один формат (часто 18).
+- YouTube на web-клиенте часто 429 / bot wall / «Missing required Visitor Data». Это не «yt-dlp сломан»: webpage может 429, пока android/ios/tv API уже отдают метаданные. Cookies не всегда спасают: при bot-wall cookies могут дать тот же отказ, тогда срабатывает `--extractor-args "youtube:player_client=android,ios,tv"`.
+- `--cookies-from-browser chrome` требует: (1) логин в YouTube именно в Chrome (Safari-куки пустые — не предлагать), (2) Full Disk Access у процесса-предка (на машине пользователя gateway запущен через `/usr/bin/osascript` от launchd — FDA должен быть выдан ему, иначе `~/Library/Cookies` и база кук Chrome дают `Operation not permitted` от TCC). Дешифровка Chrome-кук через keychain проходит молча.
+- android/ios могут пропускать https-форматы (SABR); tv может быть DRM. Это warning, не стоп, пока есть хоть один формат (часто 18).
 - Формат 18 после player_client ок для `--audio`. Для видео — мало (~360p): нужен DASH через cookies/web, не останавливаться на 18.
 - YouTube сейчас часто отдаёт DASH (video-only + audio-only), комбинированных форматов нет:
   `-f "b[filesize<30M]"` падает с «Requested format is not available» — `b` ищет формат со звуком+видео в одном.
@@ -139,5 +137,6 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 ...]
 1. Перед работой: `~/.local/bin/yt-dlp -U` напечатал `up to date` или `Updated yt-dlp to`. Регрессия скрипта: `python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --self-test` → `SELFTEST OK`.
 2. Скрипт напечатал `OK ~/result-yt-dlp/YYYY-MM-DD_<название>.<ext> (N KiB)` — имя начинается с сегодняшней даты, размер > 0.
 3. `ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,codec_type -of default=noprint_wrappers=1 <файл>` — кодеки, длительность, размер на месте.
-4. `[Merger] Merging formats into ...` в логе yt-dlp — склейка прошла, part-файлы удалены.
-5. 0-байтовый файл = ошибка скачивания — повторить.
+4. Видео не ниже 720p: ffprobe по `height` из stream. Скрипт может отрапортовать `OK` на format 18 (360p) после лестницы player_client — это не результат: продолжать через cookies/DASH (`-f "137+140"` и т.п.) или сообщить пользователю.
+5. `[Merger] Merging formats into ...` в логе yt-dlp — склейка прошла, part-файлы удалены.
+6. 0-байтовый файл = ошибка скачивания — повторить.
