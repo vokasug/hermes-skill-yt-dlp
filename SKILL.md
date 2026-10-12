@@ -1,7 +1,7 @@
 ---
 name: yt-dlp
 description: download videos/audio/subs from web sites via yt-dlp
-version: 1.3.2
+version: 1.3.3
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
@@ -103,7 +103,7 @@ python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 .
    3. `--cookies-from-browser chrome` (логин YouTube живёт в Chrome; Safari пустой);
    4. оба вместе.
    Cookies ≠ панацея: при bot-wall cookies могут дать тот же отказ, когда player_client проходит.
-   429 на субтитрах — это класс автопереводов: ручные и оригинальные auto (`-orig`) не лимитируются, поэтому `--sub-langs "<lang>.*,<lang>"`. Если всё же 429 — пройти лестницу выше по одному разу на ступень; все попытки дали 429 — сообщить об ошибке. Без пауз и отложенных повторов.
+   429 на субтитрах — временный rate-limit YouTube, а не класс автопереводов: зафиксирован и на оригинальных auto-субтитрах (`-orig`), когда все четыре ступени лестницы подряд давали 429, а через ~40–60 минут та же базовая команда отрабатывала без единого флага. Порядок: один проход по лестнице выше (немедленные повторы в этом состоянии бесполезны); все ступени дали 429 — сообщить об ошибке и идти дальше без субтитров (для потребителей это не блокер); отложенный повтор базовой команды позже обычно успешен. `--sub-langs "<lang>.*,<lang>"` остаётся правилом — автопереводы лимитируются чаще оригиналов.
 5. Нестандартные задачи (субтитры, SponsorBlock) — сырой yt-dlp с шаблоном вывода из Quick Reference (дата через `$(date +%F)`). Cookies и extractor-args — теми же флагами, что в лестнице.
 6. Отчитываться списком `OK <путь>` строк из stdout скрипта. Не «скачал», пока файл не подтверждён на диске (Verification ниже).
 
@@ -119,6 +119,7 @@ python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py <URL> [URL2 .
 ## Pitfalls
 
 - YouTube на web-клиенте часто 429 / bot wall / «Missing required Visitor Data». Это не «yt-dlp сломан»: webpage может 429, пока android/ios/tv API уже отдают метаданные. Cookies не всегда спасают: при bot-wall cookies могут дать тот же отказ, тогда срабатывает `--extractor-args "youtube:player_client=android,ios,tv"`.
+- Ступень «cookies + player_client=android,ios,tv» деградирует до одного tv-клиента: android/ios не поддерживают cookies (yt-dlp пропускает их с warning), а tv с cookies может падать с `The page needs to be reloaded`. Успех этой ступени низкий (зафиксировано дважды подряд на 429 субтитров); её отказ сам по себе — не признак жёсткого bot-wall.
 - `--cookies-from-browser chrome` требует: (1) логин в YouTube именно в Chrome (Safari-куки пустые — не предлагать), (2) Full Disk Access у процесса-предка (на машине пользователя gateway запущен через `/usr/bin/osascript` от launchd — FDA должен быть выдан ему, иначе `~/Library/Cookies` и база кук Chrome дают `Operation not permitted` от TCC). Дешифровка Chrome-кук через keychain проходит молча.
 - android/ios могут пропускать https-форматы (SABR); tv может быть DRM. Это warning, не стоп, пока есть хоть один формат (часто 18).
 - Формат 18 после player_client ок для `--audio`. Для видео — мало (~360p): нужен DASH через cookies/web, не останавливаться на 18.
